@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Menu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        #homepage {
+            display: none;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .txtcolor {
+
+            font-weight: 800;
+            color: #795626;
+        }
+
+        label {
+            margin-bottom: 10px;
+        }
+
+        input {
+            height: 50px;
+        }
+
+        .loginbtn {
+            margin-top: 50px;
+        }
+
+        .btnAdd {
+            background-color: #ECB159;
+            color: whitesmoke;
+            border-color: transparent;
+        }
+
+        .Heading {
+            color: #762C08;
+            font-style: oblique;
+        }
+
+        .itemNames {
+            color: #B67352;
+        }
+
+        .swal2-radio label {
+
+            display: flex;
+            flex-wrap: nowrap;
+            flex-direction: column-reverse;
+        }
+
+        .swal2-radio input {
+            position: absolute;
+
+            height: 20px;
+            width: 20px;
+        }
+
+        .swal2-radio span {
+            margin-left: 40px;
+        }
+
+        .logoimages {
+            position: absolute;
+            border: #795626 solid 2px;
+            border-radius: 50px;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div id="login-section">
+
+        <div class="container-fluid">
+            <div style="display: flex; justify-content: center;">
+                <img src="images/logo.png" alt="Logo here" height="250px" width="250px">
+            </div>
+            <h3 class="text-center pt-5 txtcolor" style="    font-style: oblique;">Login</h3>
+            <div id="login-row" class="row justify-content-center align-items-center">
+                <div id="login-column" class="col-md-4">
+                    <div id="login-box" class="col-md-12">
+                        <form id="login-form" class="form" action="" method="post">
+
+                            <div class="form-group">
+                                <label for="username" class="txtcolor"><b>User Name :</b></label><br>
+                                <input type="text" name="username" id="username" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="password" class="txtcolor"><b>Password :</b></label><br>
+                                <input type="text" name="password" id="password" class="form-control">
+                            </div>
+                            <div class="form-group" style="text-align: center;">
+                                <input type="button" name="Login" class="btn btn-info btn-md loginbtn" onclick="login()"
+                                    style="    width: 100%;font-weight: 800;
+                                    background-color: #795626; color: white;border-color: transparent;" value="Login">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <footer style="text-align: center; padding: 10px; background: #f8f9fa; font-size: 14px;">
+                &copy; <span id="year"></span> All Rights Reserved By Manikanta.
+            </footer>
+        </div>
+
+    </div>
+
+    <div class="container-fluid " id="homepage" style="background-color:#FEFBF6">
+        <div id="logoimages" class="logoimages"> </div>
+        <h1 class="text-center mb-4 Heading" style=" padding-top: 20px;" id="hotelName"></h1>
+        <div style="position: absolute;right: 60px;top: 30px;">
+            <button onclick="logout()" title="LogOut" style="background-color: rgb(254, 251, 246);
+    border: transparent;"><img src="images/logoutImage.png" height="50" width="50" alt="LogOut"></button>
+        </div>
+        <div class="row">
+
+            <div class="col-md-8 ">
+                <input type="search" id="searchInput" style="    margin-bottom: 1.5rem !important;"
+                    class="form-control mb-2" placeholder="Search for items" oninput="searchMenu()">
+                <div id="menu" class="row g-3" style="overflow-y: scroll;height: 81vh;
+            "></div>
+            </div>
+            <div class="col-md-4">
+                <div class="card p-3">
+                    <h2 class="text-center Heading">Cart</h2>
+                    <!-- <div style="margin-bottom: -35px;justify-content: center; display: flex ;">
+                        <p style=" margin-left: 165px; "><b>Full</b></p>
+                        <p style=" margin-left: 50px; "><b>Half</b></p>
+                    </div> -->
+
+                    <div id="cart-items" class="my-3"></div>
+                    <div class="total fw-bold text-center Heading" id="total"></div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-success" onclick="checkout()">Checkout</button>
+                        <button class="btn btn-warning" onclick="clearCart()" id="clearBtn">Clear</button>
+                    </div>
+                    <div id="qr-code" class="text-center mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        var total;
+        localStorage.setItem("isLoggedIn", "false");
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+        var checkoutclicked;
+        const menuItems = [
+            { id: 1, name: 'Breakfast Combo', fullPrice: 150, imgSource: "./images/Breakfast-combo.jpg" },
+            { id: 2, name: 'Butter Dosa', fullPrice: 50, imgSource: "./images/butter_dosa.jpg" },
+            { id: 3, name: 'Cheese Dosa', fullPrice: 50, imgSource: "./images/cheese-dosa.webp" },
+            { id: 4, name: 'Chicken Dosa', fullPrice: 100, imgSource: "./images/chicken_dosa.jpg" },
+            { id: 5, name: 'Cholebhature Puri', fullPrice: 50, halfPrice: 30, imgSource: "./images/cholebhature_puri.webp" },
+            { id: 6, name: 'Dahi Vada', fullPrice: 50, halfPrice: 30, imgSource: "./images/Dahi Vada.jpg" },
+            { id: 7, name: 'Plain Dosa', fullPrice: 30, imgSource: "./images/Dosa.jpg" },
+            { id: 8, name: 'Ghee Karam Dosa', fullPrice: 50, imgSource: "./images/Ghee_karam_dosa.jpg" },
+            { id: 9, name: 'Egg Dosa', fullPrice: 50, halfPrice: 30, imgSource: "./images/egg_dosa.jpg" },
+            { id: 10, name: 'Ghee Idly', fullPrice: 50, halfPrice: 30, imgSource: "./images/gheeIdly.png" },
+            { id: 11, name: 'Upma Idly', fullPrice: 50, halfPrice: 30, imgSource: "./images/Idli-Upma.jpg" },
+            { id: 12, name: 'Plain Idly', fullPrice: 30, halfPrice: 20, imgSource: "./images/idly-podi-image.jpg" },
+            { id: 13, name: 'Karam Idly', fullPrice: 35, halfPrice: 20, imgSource: "./images/Karam-Idly.webp" },
+            { id: 14, name: 'Lemon Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/lemon-rice.jpg" },
+            { id: 15, name: 'Maida Bonda', fullPrice: 30, halfPrice: 20, imgSource: "./images/maida-Bonda.jpg" },
+            { id: 16, name: 'Masala Dosa', fullPrice: 40, imgSource: "./images/masala_Dosa.jpg" },
+            { id: 17, name: 'Masala Pesarattu', fullPrice: 40, imgSource: "./images/masala_pesarattu.jpg" },
+            { id: 18, name: 'Masala Uttapam', fullPrice: 40, imgSource: "./images/Masala_uttapam.jpg" },
+            { id: 19, name: 'Masala Idly', fullPrice: 40, halfPrice: 25, imgSource: "./images/Masala-Idly.jpg" },
+            { id: 20, name: 'Masala Vada', fullPrice: 40, halfPrice: 25, imgSource: "./images/masala-vada.jpg" },
+            { id: 21, name: 'Mysore Bonda', fullPrice: 40, halfPrice: 25, imgSource: "./images/Mysore-Bonda.jpg" },
+            { id: 22, name: 'Onion Rava Dosa', fullPrice: 40, imgSource: "./images/onion_rava_dosa.jpg" },
+            { id: 23, name: 'Onion Bonda', fullPrice: 40, halfPrice: 25, imgSource: "./images/onion-Bonda.jpg" },
+            { id: 24, name: 'Onion-Dosa', fullPrice: 40, imgSource: "./images/onion-dosa.jpg" },
+            { id: 25, name: 'Onion Uttapam', fullPrice: 40, imgSource: "./images/OnionUttapam.jpg" },
+            { id: 26, name: 'Onion Peasarttu', fullPrice: 40, imgSource: "./images/onlinepeasarttu.jpg" },
+            { id: 27, name: 'Pesara Upma', fullPrice: 50, halfPrice: 30, imgSource: "./images/pesara-upma.JPG" },
+            { id: 28, name: 'Plain Uttapam', fullPrice: 30, imgSource: "./images/Plain Uttapam.webp" },
+            { id: 29, name: 'Plain Pesarattu', fullPrice: 30, imgSource: "./images/plain_Pesarattu.jpg" },
+            { id: 30, name: 'Plain Upma', fullPrice: 50, halfPrice: 30, imgSource: "./images/Plainupma.jpg" },
+            { id: 31, name: 'Plain Rava Dosa', fullPrice: 40, imgSource: "./images/PlainRavaDosa.jpg" },
+            { id: 32, name: 'Plain Vada', fullPrice: 40, halfPrice: 25, imgSource: "./images/Plainvada.jpg" },
+            { id: 33, name: 'Tamarind Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/Pulihora_Tamarind_Rice.jpg" },
+            { id: 34, name: 'kaju TamarindRice', fullPrice: 70, halfPrice: 50, imgSource: "./images/PulihoraTamarindRice.jpg" },
+            { id: 35, name: 'Punugulu', fullPrice: 40, halfPrice: 25, imgSource: "./images/punugulu.webp" },
+            { id: 36, name: 'Puri', fullPrice: 40, halfPrice: 25, imgSource: "./images/puri.jpg" },
+            { id: 37, name: 'Rava Masala Dosa', fullPrice: 50, imgSource: "./images/Rava_masala_Dosa.jpg" },
+            { id: 38, name: 'Onion Rava Uttapam', fullPrice: 50, imgSource: "./images/rava-uttapam_onion.webp" },
+            { id: 39, name: 'Sambar Idly', fullPrice: 40, halfPrice: 25, imgSource: "./images/Sambar-Idli-1.webp" },
+            { id: 40, name: 'Sambar Vada', fullPrice: 40, halfPrice: 25, imgSource: "./images/Sambar_Vada.JPG" },
+            { id: 41, name: 'Butter Uttapam', fullPrice: 50, imgSource: "./images/uttapam-butter.png" },
+            { id: 42, name: 'Veggies Upma', fullPrice: 50, halfPrice: 30, imgSource: "./images/veggies-upma.jpg" },
+            { id: 43, name: 'Pongal Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/Pongal Rice.jpg" },
+            { id: 44, name: 'Sambaar Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/Sambaar Rice.jpg" },
+            { id: 45, name: 'Jeera Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/Jeera Rice.jpg" },
+            { id: 46, name: 'Tomato Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/Tomato Rice.jpg" },
+            { id: 47, name: 'Curd Rice', fullPrice: 50, halfPrice: 30, imgSource: "./images/Curd Rice.jpg" }
+        ];
+        const cart = [];
+        function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            if (username.toLowerCase() === "tajdeccan" && password.toLowerCase() === "1234") {
+                localStorage.setItem("isLoggedIn", "true");  // Store login state
+
+                document.getElementById("logoimages").innerHTML = `<img src="images/tajdeccanlogo.png"  alt="Taj Deccan" style="height: 85px; object-fit: cover;">`;
+                document.getElementById("hotelName").innerHTML = `Welcome To  Taj Deccan`;
+                showMenu();
+            }
+            else if (username.toLowerCase() === "thegolkondahotel" && password.toLowerCase() === "1234") {
+                localStorage.setItem("isLoggedIn", "true");  // Store login state
+                document.getElementById("logoimages").innerHTML = `<img src="images/thegolkondahotellogo.png"  alt="The Golkonda Hotel" style="height: 85px; object-fit: cover;">`;
+
+                document.getElementById("hotelName").innerHTML = `Welcome To The Golkonda Hotel`;
+                showMenu();
+            }
+            else if (username.toLowerCase() === "admin" && password.toLowerCase() === "1234") {
+                localStorage.setItem("isLoggedIn", "true");  // Store login state
+                document.getElementById("logoimages").innerHTML = `<img src="images/logo.png"  alt="Logo" style="height: 85px;border-radius: 50%; object-fit: cover;">`;
+
+                document.getElementById("hotelName").innerHTML = `Welcome To Admin`;
+                showMenu();
+            }
+            else if (username.toLowerCase() === "itckohenur" && password.toLowerCase() === "1234") {
+                localStorage.setItem("isLoggedIn", "true");  // Store login state
+                document.getElementById("logoimages").innerHTML = `<img src="images/itckohenurlogo.png"  alt="ITC Kohenur" style="height: 85px; object-fit: cover;">`;
+
+                document.getElementById("hotelName").innerHTML = `Welcome To ITC Kohenur`;
+                showMenu();
+            }
+            else {
+                Swal.fire('Error', 'Invalid credentials!', 'error');
+            }
+        }
+
+        function showMenu() {
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("homepage").style.display = "block";
+        }
+
+        function logout() {
+            localStorage.removeItem("isLoggedIn");
+            const username = document.getElementById("username").value = '';
+            const password = document.getElementById("password").value = '';  // Clear login state
+            document.getElementById("login-section").style.display = "block";
+            document.getElementById("homepage").style.display = "none";
+        }
+
+        // Check login state on page load
+        window.onload = function () {
+            if (localStorage.getItem("isLoggedIn") === "true") {
+                showMenu();
+            } else {
+                document.getElementById("login-section").style.display = "block";
+                document.getElementById("homepage").style.display = "none";
+            }
+        };
+
+
+        function displayMenu(items = menuItems) {
+            const menuDiv = document.getElementById('menu');
+            menuDiv.innerHTML = ''; // Clear previous menu
+            items.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'col-md-4 mb-4';
+                itemDiv.innerHTML = `
+            <div class="card text-center p-3 shadow">
+                <img src="${item.imgSource}" class="card-img-top rounded" alt="${item.name}" style="height: 150px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title itemNames" style="margin-top: 10px;">${item.name}</h5>
+                    <button class="btn btn-dark m-1 btnAdd" onclick="addToCart(${item.id}, 'full')">Full ₹${item.fullPrice}</button>
+                    ${item.halfPrice ? `<button class="btn btn-primary m-1 btnAdd" onclick="addToCart(${item.id}, 'half')"> Half ₹${item.halfPrice}</button>` : ''}
+                </div>
+            </div>
+        `;
+                menuDiv.appendChild(itemDiv);
+            });
+            displayTotal();
+        }
+        function searchMenu() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            if (query === "") {
+                displayMenu(); // Show all items if search is cleared
+                return;
+            }
+
+            const filteredItems = menuItems.filter(item => item.name.toLowerCase().includes(query));
+            displayMenu(filteredItems);
+        }
+        function addToCart(itemId, portion) {
+            const qrCodeDiv = document.getElementById('qr-code');
+            qrCodeDiv.innerHTML = `<div class="loader"></div>`;
+            document.getElementById("clearBtn").disabled = false;
+            const existingItem = cart.find(i => i.id === itemId && i.portion === portion);
+            if (existingItem) {
+                existingItem.quantity++;
+            } else {
+                const menuItem = menuItems.find(i => i.id === itemId);
+                const price = portion === 'full' ? menuItem.fullPrice : menuItem.halfPrice;
+                cart.push({ ...menuItem, portion, price, quantity: 1 });
+            }
+            displayCart();
+        }
+        function displayCart() {
+            const cartItemsDiv = document.getElementById('cart-items');
+            cartItemsDiv.innerHTML = '';
+            cart.forEach((item, index) => {
+                cartItemsDiv.innerHTML += `
+                    <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                         <img src="${item.imgSource}" alt="${item.name} Here " style="height:40px;width:40px; object-fit: cover;"><p class="itemNames" title=${item.name} style=" width: 150px;display: block; white-space: nowrap;
+                         overflow: hidden; text-overflow: ellipsis;">${item.name}</p><span> (${item.portion} x${item.quantity}) - ₹${item.price * item.quantity}</span>
+                        <button id="removebtn" class="btn btn-sm btn-danger" style="height: 20px; align-items: center;display: flex;    margin-top: 5px;" onclick="removeFromCart(${index})">X</button>
+                    </div>`;
+            });
+            displayTotal();
+        }
+        function removeFromCart(index) {
+            document.getElementById("clearBtn").disabled = false;
+            const qrCodeDiv = document.getElementById('qr-code');
+            qrCodeDiv.innerHTML = `<div class="loader"></div>`;
+
+            if (cart[index].quantity > 1) {
+                cart[index].quantity--;
+            } else {
+                cart.splice(index, 1);
+            }
+            displayCart();
+        }
+        function displayTotal() {
+            let total = 0;
+            if (cart && cart.length > 0) {
+                total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            }
+            document.getElementById('total').innerText = `Total: ₹${total}`;
+        }
+        let timerInterval;
+
+        function checkout() {
+            document.getElementById("clearBtn").disabled = true;
+
+            if (cart.length === 0) {
+                alert('Your cart is empty.');
+                return;
+            }
+
+            let orderSummary = "🛒 Your Order:\n\n";
+            cart.forEach(item => {
+                orderSummary += `${item.name} (${item.portion}) x${item.quantity} - ₹${item.price * item.quantity}\n`;
+            });
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            orderSummary += `\n💰 Total Amount: ₹${total}`;
+
+            // Ask user for payment method
+            Swal.fire({
+                title: 'Select Payment Method',
+                input: 'radio',
+                inputOptions: {
+                    cash: 'Cash',
+                    upi: 'UPI (QR Code)'
+                },
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Please select a payment method!';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    if (result.value === 'cash') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Order Confirmed!',
+                            text: 'You have chosen to pay with Cash. Thank you!',
+                            confirmButtonText: 'OK'
+                        });
+                        displayCart();
+                        document.getElementById("clearBtn").disabled = false;
+                    } else {
+                        generateQRCode(total);
+                    }
+                }
+            });
+        }
+
+        function generateQRCode(total) {
+            const qrData = `upi://pay?pa=7013063222@ybl&pn=Hotel&tn=Hotel Bill&am=${total}&cu=INR`;
+            const encodedQrData = encodeURIComponent(qrData);
+            const qrCodeUrl = `https://quickchart.io/qr?text=${encodedQrData}&size=200`;
+            const qrCodeDiv = document.getElementById('qr-code');
+            qrCodeDiv.innerHTML = `<div class="loader"></div>`;
+
+            let timeLeft = 180;
+            if (timerInterval) clearInterval(timerInterval);
+            let countdownDiv = document.getElementById("qr-timer");
+
+            if (!countdownDiv) {
+                countdownDiv = document.createElement("p");
+                countdownDiv.id = "qr-timer";
+                countdownDiv.style.color = "red";
+                countdownDiv.style.fontWeight = "bold";
+                qrCodeDiv.appendChild(countdownDiv);
+            }
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                countdownDiv.innerText = `QR Code expires in: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    qrCodeDiv.innerHTML = '<p style="color:red;">QR Code Expired. Generate a new one.</p>';
+
+                    document.getElementById("clearBtn").disabled = false;
+                }
+                timeLeft--;
+            }, 1000);
+
+            setTimeout(() => {
+                qrCodeDiv.innerHTML = ''; // Clear loader
+                const qrImage = new Image();
+                qrImage.src = qrCodeUrl;
+                qrImage.alt = "Scan to Pay";
+                qrImage.onload = function () {
+                    Swal.fire({
+                        title: 'Scan to Pay',
+                        html: `<img src="${qrCodeUrl}" alt="Scan to Pay"><br><p id="modal-qr-timer">${countdownDiv.innerText}</p>`,
+                        showConfirmButton: false,
+                        timer: timeLeft * 1000,
+                        timerProgressBar: true,
+                        willClose: () => {
+                            clearInterval(timerInterval);
+                            qrCodeDiv.innerHTML = '<p style="color:red;">QR Code Expired. Generate a new one.</p>';
+
+                            document.getElementById("clearBtn").disabled = false;
+                        }
+                    });
+
+                    timerInterval = setInterval(() => {
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        document.getElementById("modal-qr-timer").innerText = `QR Code expires in: ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+                        if (timeLeft <= 0) {
+                            clearInterval(timerInterval);
+                            Swal.close();
+
+                        }
+                        timeLeft--;
+                    }, 1000);
+                };
+
+            }, 1000);
+
+            displayCart();
+
+        }
+        function clearCart() {
+            if (cart.length != 0) {
+                cart.length = 0;
+                const qrCodeDiv = document.getElementById('qr-code');
+                qrCodeDiv.innerHTML = '';
+                displayCart();
+                alert('🛒 Cart has being  cleared.');
+                total = 0;
+            }
+            else {
+                alert('🛒 Cartis empty.');
+            }
+        }
+        displayMenu();
+    </script>
+</body>
+
+</html>
